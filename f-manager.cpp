@@ -5,11 +5,13 @@
 #include<ctime>
 #include<vector>
 #include<thread>
+#include <mutex>
+
 
 using namespace std;
 
 vector<string> clipboard_history;
-
+mutex history_mutex; 
 
 string get_clipboard_data(){
     string data;
@@ -45,22 +47,21 @@ bool check_for_empty_data(string s){
 
 void save_clipboard_Data(){
     if (clipboard_history.empty() || clipboard_history.back() != get_clipboard_data()){
-        //if(!check_for_empty_data(get_clipboard_data())){
             clipboard_history.push_back(get_clipboard_data());
-        //}
     }
 }
 
 
 
 void show_clipboard_data(){
-    system("clear");
+    lock_guard<mutex> lock(history_mutex);
+    cout << "\033[H\033[J"; 
     for(int i = 0;i<clipboard_history.size();i++){
         if(clipboard_history[i] != ""){
             cout<<"  ["<<i+1<<"]  "<<clipboard_history[i]<<endl;
         }
         else{
-            cout<<"  ["<<i<<"] "<<"No data in clipboard";
+            cout<<"  ["<<i+1<<"] "<<"No data --> clipboard is empty :()"<<endl;
         }
     }
 }
@@ -68,6 +69,7 @@ void show_clipboard_data(){
 
 
 void copy_to_clipboard(int index){
+    lock_guard<mutex> lock(history_mutex);
     FILE *file = popen("pbcopy", "w");
     if (file){
         fwrite(clipboard_history[index].c_str(),sizeof(char),clipboard_history[index].length(),file);
@@ -80,23 +82,27 @@ void copy_to_clipboard(int index){
  
 
 void copy_to_clipboard_interface(){
-    cout<<"Enter the index of the data you want to copy to clipboard: "<<endl<<endl<<endl<<endl<<endl;
-    int index;
-    cin>>index;
-    if(index >= 0 && index < clipboard_history.size()){
-        copy_to_clipboard(index);
-    }
-    else{
-        cout<<"Invalid index"<<endl;
+    while (true) {
+        cout<<"Enter the index of the data you want to copy to clipboard: "<<endl<<endl<<endl<<endl<<endl;
+        int index;
+        cin>>index;
+        if(index >= 0 && index < clipboard_history.size()){
+            copy_to_clipboard(index-1);
+        }
+        else{
+            cout<<"Invalid index"<<endl;
+        }
     }
 }
 
 
 int main(){
+        thread user_input_thread(copy_to_clipboard_interface);
     while(true){
         save_clipboard_Data();
         show_clipboard_data();
         this_thread::sleep_for(chrono::seconds(2));
     }
+    user_input_thread.join();
     return 0;
 }        
