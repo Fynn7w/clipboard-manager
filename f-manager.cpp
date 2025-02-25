@@ -54,18 +54,18 @@ void save_clipboard_Data(){
 
 
 void show_clipboard_data(){
-    lock_guard<mutex> lock(history_mutex);
-    cout << "\033[H\033[J"; 
+    system("clear");
+    cout<<"type the index of the data you want to copy to clipboard: "<<endl<<endl<<endl;
     for(int i = 0;i<clipboard_history.size();i++){
         if(clipboard_history[i] != ""){
             cout<<"  ["<<i+1<<"]  "<<clipboard_history[i]<<endl;
         }
         else{
-            cout<<"  ["<<i+1<<"] "<<"No data --> clipboard is empty :()"<<endl;
+            cout<<"  ["<<i+1<<"] "<<"No data --> clipboard is empty :("<<endl;
         }
     }
-}
-
+    }
+    
 
 
 void copy_to_clipboard(int index){
@@ -83,16 +83,15 @@ void copy_to_clipboard(int index){
 
 void copy_to_clipboard_interface(){
     while (true) {
-        cout<<"Enter the index of the data you want to copy to clipboard: "<<endl<<endl<<endl<<endl<<endl;
-        int index;
-        cin>>index;
-        if(index >= 0 && index < clipboard_history.size()){
-            copy_to_clipboard(index-1);
-        }
-        else{
-            cout<<"Invalid index"<<endl;
-        }
+    int index;
+    cin>>index;
+    if(index >= 0 && index < clipboard_history.size()){
+        copy_to_clipboard(index-1);
     }
+    else{
+        cout<<"Invalid index"<<endl;
+    }
+}
 }
 
 
