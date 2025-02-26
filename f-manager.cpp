@@ -6,7 +6,7 @@
 #include<vector>
 #include<thread>
 #include <mutex>
-
+#include <cstdio> 
 
 
 #define RESET   "\033[0m"
@@ -35,7 +35,48 @@ void something_went_wrong(string m){
         set_color("\033[0m");
 }
 
+void save_to_file(){
+    const char* homeDir = getenv("HOME");
+    if(homeDir == NULL){
+        something_went_wrong("something went wrong...");
+        return;
+    }
+    std::string filePath = std::string(homeDir) + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
+    FILE* file = fopen(filePath.c_str(), "a");
+    if(file == nullptr){
+        something_went_wrong("something went wrong...");
+        return;
+    }
+    if(file){
+        for(int i = 0; i < clipboard_history.size(); i++){
+            fwrite(clipboard_history[i].c_str(), sizeof(char), clipboard_history[i].length(), file);
+            fwrite("\n", sizeof(char), 1, file);
+        }
+        fclose(file);
+    }
+}
 
+
+void read_file(){
+    const char* homeDir = getenv("HOME");
+    if(homeDir == NULL){
+        something_went_wrong("something went wrong...");
+        return;
+    }
+    std::string filePath = std::string(homeDir) + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
+    FILE* file = fopen(filePath.c_str(), "r");
+    if(file == nullptr){
+        something_went_wrong("something went wrong...");
+        return;
+    }
+    if(file){
+        char buffer[1024];
+        while(fgets(buffer, sizeof(buffer), file)){
+            clipboard_history.push_back(buffer);
+        }
+        fclose(file);
+    }
+}
 
 string get_clipboard_data(){
     string data;
@@ -128,6 +169,14 @@ void copy_to_clipboard_interface(){
 void prompt(){
     cout<<""<<endl<<endl<<endl;
     cout<<"command :"<<endl;
+}
+
+
+
+void statistics(){
+    //all time copy
+    //.app used since
+    //app used 
 }
 
 
