@@ -83,6 +83,7 @@ void read_file(){
     if(file){
         char buffer[1024];
         while(fgets(buffer, sizeof(buffer), file)){
+            std::string line(buffer);
             clipboard_history.push_back(buffer);
         }
         fclose(file);
@@ -108,17 +109,28 @@ string get_clipboard_data(){
     return data;
 }
 
+bool check_for_double_data(string s){
+    for(int x = 0; x < clipboard_history.size(); x++){
+        if(clipboard_history[x] == s){
+            return true;
+        }
+   }
+   return false;
+}
+
 
 void save_clipboard_Data(){
-    if (clipboard_history.empty() || clipboard_history.back() != get_clipboard_data()){
+    if (clipboard_history.empty() || clipboard_history.back() != get_clipboard_data() && !check_for_double_data(get_clipboard_data())){
             clipboard_history.push_back(get_clipboard_data());
     }
 }
+
 
 void keep_last_two_lines(){
     clipboard_history.erase(clipboard_history.begin(), clipboard_history.end() - 2);
     save_to_file("w");
 }
+
 
 bool check_for_empty_data(string s){ //useless i guess
     int count = 0;
@@ -133,13 +145,15 @@ bool check_for_empty_data(string s){ //useless i guess
     return false;
 }
 
+
 void show_clipboard_data(){
     system("clear");
     cout << "[state]         [i]  [content]" << endl;
     cout << "__________________________________" << endl<< endl;
     for (int i = 0; i < clipboard_history.size(); i++) {
         string res = clipboard_history[i];
-        if (clipboard_history[i] != "") {
+        if (clipboard_history[i] != "" && clipboard_history[i] != "\n"&& 
+            clipboard_history[i] != " " && clipboard_history[i] != "\t"){ //not really needed
             if (res.size() > 30) {
                 res = res.substr(0, 30) + "..."; 
             }
@@ -153,7 +167,8 @@ void show_clipboard_data(){
             cout<<"used recently   [" << i + 1 << "]  " << res<<endl;
             set_color("\033[0m");
             }
-        } if(clipboard_history.empty()){ 
+        } 
+        if(clipboard_history.empty()){ 
             something_went_wrong("  [1]  no data; clipboard is empty :(");
         }
     }
@@ -172,13 +187,16 @@ void copy_to_clipboard(int index){
     }
 }
 
-void session(){
-    
+std::string trim_end(std::string s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+    return s;
 }
 
 
 void copy_to_clipboard_interface(){
-    std::string s = "open";
+    std::string s = "";
     int index;
     string path = get_home_dir() + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
     while (true) {
