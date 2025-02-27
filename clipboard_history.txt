@@ -1,2 +1,2 @@
-clipboard_history
-()
+something_went_wrong
+get_home_dir
