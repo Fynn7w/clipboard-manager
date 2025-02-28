@@ -31,7 +31,7 @@ bool first_time = false;
 bool stats_view = false;
 auto start_time = std::chrono::steady_clock::now();
 bool date_view = false;
-
+string promptmode = "small";
 
 
 void set_color(const string& color_code) 
@@ -267,13 +267,22 @@ bool check_for_empty_data(string s)
     return false;
 }
 
-void prompt()
+
+void prompt(string mode)
 {
     set_color(RESET);
     cout<<""<<endl<<endl<<endl;
-    cout << "press [i]ndex to copy, press e to edit fav"<< endl;
-    cout<<"press q save and quit"<<endl;
-    cout<<"command :"<<endl;
+    if(mode=="small"){
+        cout << "[index] to copy, [s] see stats, [e] edit fav, [d] change menu, [q] quit"<< endl;
+    }
+    if(mode=="normal")
+    {
+        cout<<  "press [s] to see stats"<<endl;
+        cout<<  "press [e] to open file/edit fav"<<endl;
+        cout<<  "press [q] to (save) quit "<<endl;   
+        cout<<  "press [d] change menu "<<endl<<endl;
+        cout<<"command :"<<endl;
+    }
 }
 
 
@@ -285,17 +294,17 @@ void show_clipboard_data(string mode)
     {
         cout << "[state]          [i]  [content]          Total: "<<count_all<<
         "  logs: "<<count_logs<<endl;
-        cout << "__________________________________________________" << endl<< endl;
+        cout << "____________________________________________________________________" << endl<< endl;
     }
     if(mode=="without_stats")
     {
-        cout << "[state]          [i]  [content]     saved in /file-manager/clipboard_history.txt" << endl;
-        cout << "__________________________________________________" << endl<< endl;
+        cout << "[state]          [i]  [content]       f:~/clipboard_history.txt" << endl;
+        cout << "____________________________________________________________________" << endl<< endl;
     }
     if(mode=="date")
     {
         cout << "[state]          [i]  [content]"<<"         uptime: "<<print_uptime()<<endl;
-        cout << "__________________________________________________" << endl<< endl;
+        cout << "____________________________________________________________________" << endl<< endl;
     }
     for (int i = 0; i < clipboard_history.size(); i++) 
     {
@@ -412,7 +421,7 @@ void check_view()
     {
         show_clipboard_data("without_stats");
     }
-    prompt();
+    prompt(promptmode);
 }
 
 
@@ -452,6 +461,16 @@ void copy_to_clipboard_interface()
                 s_count = 0;
                 break;
             }            
+        }
+        if(key == 'd')
+        {
+            if(promptmode == "normal")
+            {
+                promptmode = "small";
+            }
+            else{
+                promptmode = "normal";
+            }
         }
         else if (key >= '1' && key <= '9') 
         {  
@@ -497,6 +516,7 @@ void loop(){
     }
     user_input_thread.join();
 }
+
 
 
 int main()
