@@ -34,13 +34,15 @@ bool date_view = false;
 
 
 
-void set_color(const string& color_code) {
+void set_color(const string& color_code) 
+{
     cout << color_code;
 }
 
 
 
-string print_uptime() {
+string print_uptime() 
+{
     auto now = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start_time);
     return std::to_string(elapsed.count());
@@ -48,13 +50,15 @@ string print_uptime() {
 
 
 
-void erease_clipboard_history(){
+void erease_clipboard_history()
+{
     clipboard_history.clear();
 } 
 
 
 
-void something_went_wrong(string m){
+void something_went_wrong(string m)
+{
         set_color("\033[31m");
         cout<<m<<endl;
         set_color("\033[0m");
@@ -62,9 +66,11 @@ void something_went_wrong(string m){
 
 
 
-std::string get_home_dir(){
+std::string get_home_dir()
+{
     const char* homeDir = getenv("HOME");
-    if(homeDir == NULL){
+    if(homeDir == NULL)
+    {
         something_went_wrong("something went wrong...");
         return 0;
     }
@@ -73,7 +79,8 @@ std::string get_home_dir(){
 
 
 
-void animation(){
+void animation()
+{
     cout << "" << endl;
     cout << "" << endl;
     cout << "       /\\_/\\" << std::endl;
@@ -89,7 +96,8 @@ void animation(){
 
 
 
-char getch() {
+char getch() 
+{
     struct termios oldt, newt;
     char ch;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -103,21 +111,27 @@ char getch() {
 
 
 
-void save_to_file(string mode,string path,string content){
+void save_to_file(string mode,string path,string content)
+{
     std::string filePath = get_home_dir() + path;
     FILE* file = fopen(filePath.c_str(), mode.c_str());
-    if(file == nullptr){
+    if(file == nullptr)
+    {
         something_went_wrong("something went wrong...");
         return;
     }
-    if(file){
-        if(content=="ch"){
-        for(int i = 0; i < clipboard_history.size(); i++){
+    if(file)
+    {
+        if(content=="ch")
+        {
+        for(int i = 0; i < clipboard_history.size(); i++)
+        {
             fwrite(clipboard_history[i].c_str(), sizeof(char), clipboard_history[i].length(), file);
             fwrite("\n", sizeof(char), 1, file);
         }
         }
-        else{
+        else
+        {
             fwrite(content.c_str(), sizeof(char), content.length(), file);
             fwrite("\n", sizeof(char), 1, file);
         }
@@ -127,7 +141,8 @@ void save_to_file(string mode,string path,string content){
 
 
 
-vector<string> read_file(string path){
+vector<string> read_file(string path)
+{
     vector<string> res;
     std::string filePath = get_home_dir() + path;
     FILE* file = fopen(filePath.c_str(), "r");
@@ -140,7 +155,8 @@ vector<string> read_file(string path){
     if(file)
     {
         char buffer[1024];
-        while(fgets(buffer, sizeof(buffer), file)){
+        while(fgets(buffer, sizeof(buffer), file))
+        {
             std::string line(buffer);
             res.push_back(buffer);
         }
@@ -151,8 +167,10 @@ vector<string> read_file(string path){
 
 
 
-void read_statistics(){
-    if(first_time){
+void read_statistics()
+{
+    if(first_time)
+    {
         save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_logs));
         save_to_file("a","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_all));
     }
@@ -162,14 +180,16 @@ void read_statistics(){
 }
 
 
-void save_statistics(){
+void save_statistics()
+{
     count_logs++;
     save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_logs));
     save_to_file("a","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_all));
     }
 
 
-string get_clipboard_data(){
+string get_clipboard_data()
+{
     string data;
     char buffer[1024];
     string command = "pbpaste";
@@ -203,7 +223,8 @@ bool check_for_double_data(string s)
 }
 
 
-void save_clipboard_Data(){
+void save_clipboard_Data()
+{
     if (clipboard_history.empty() || clipboard_history.back() != get_clipboard_data() && !check_for_double_data(get_clipboard_data()))
     {
             clipboard_history.push_back(get_clipboard_data());
@@ -214,7 +235,8 @@ void save_clipboard_Data(){
 
 
 
-void keep_last_two_lines(){
+void keep_last_two_lines()
+{
     clipboard_history.erase(clipboard_history.begin(), clipboard_history.end() - 2);
     for(int i = 0; i < clipboard_history.size(); i++)
     {
@@ -243,18 +265,22 @@ bool check_for_empty_data(string s)
 
 
 
-void show_clipboard_data(string mode){
+void show_clipboard_data(string mode)
+{
     system("clear");
-    if(mode=="with_stats"){
+    if(mode=="with_stats")
+    {
         cout << "[state]          [i]  [content]          Total: "<<count_all<<
         "  logs: "<<count_logs<<endl;
         cout << "__________________________________________________" << endl<< endl;
     }
-    if(mode=="without_stats"){
+    if(mode=="without_stats")
+    {
         cout << "[state]          [i]  [content]     saved in /file-manager/clipboard_history.txt" << endl;
         cout << "__________________________________________________" << endl<< endl;
     }
-    if(mode=="date"){
+    if(mode=="date")
+    {
         cout << "[state]          [i]  [content]"<<"         uptime: "<<print_uptime()<<endl;
         cout << "__________________________________________________" << endl<< endl;
     }
@@ -265,7 +291,8 @@ void show_clipboard_data(string mode){
         if (clipboard_history[i] != "" && clipboard_history[i] != "\n"&& 
             clipboard_history[i] != " " && clipboard_history[i] != "\t") //useless again
             {   
-            if (res.size() > 30) {
+            if (res.size() > 30) 
+            {
                 res = res.substr(0, 30) + "..."; 
             }
             else
@@ -293,7 +320,8 @@ void show_clipboard_data(string mode){
             set_color(YELLOW);
             }
         } 
-        if(clipboard_history.empty()){ 
+        if(clipboard_history.empty())
+        { 
             something_went_wrong("  [1]  no data; clipboard is empty :(");
         }
     }
@@ -301,7 +329,8 @@ void show_clipboard_data(string mode){
     
 
 
-void check_length(){
+void check_length()
+{
     if(clipboard_history.size() >= 10)
     {
         count_pages++;
@@ -310,67 +339,84 @@ void check_length(){
 }
 
 
-void copy_to_clipboard(int index){
+void copy_to_clipboard(int index)
+{
     lock_guard<mutex> lock(history_mutex);
     FILE *file = popen("pbcopy", "w");
-    if (file){
+    if (file)
+    {
         fwrite(clipboard_history[index].c_str(),sizeof(char),clipboard_history[index].length(),file);
         pclose(file);
         selected_index = index; 
-        }
-    else{
+    }
+    else
+    {
         something_went_wrong("something went wrong...");
     }
 }
 
 
-std::string trim_end(std::string s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+std::string trim_end(std::string s) 
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) 
+    {
         return !std::isspace(ch);
     }).base(), s.end());
     return s;
 }
 
 
-void open_file() {
+void open_file() 
+{
     string command = get_home_dir() + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
     pid_t pid = fork();
-    if (pid == 0) { // Child process
+    if (pid == 0) 
+    { // Child process
         execlp("open", "open", command.c_str(), nullptr);
         exit(0); // Exit child process if execlp fails
-    } else if (pid < 0) {
+    } else if (pid < 0) 
+    {
         something_went_wrong("Failed to fork process");
     }
 }
 
 
-void check_view(){
-    if(stats_view){
+void check_view()
+{
+    if(stats_view)
+    {
         show_clipboard_data("with_stats");
     }
-    else if(date_view){
+    else if(date_view)
+    {
         show_clipboard_data("date");
     }
-    else{
+    else
+    {
         show_clipboard_data("without_stats");
     }
 }
 
 
-void copy_to_clipboard_interface() {
+void copy_to_clipboard_interface() 
+{
     int s_count = 0;
-    while (true) {
+    while (true) 
+    {
         char key = getch();  
 
-        if (key == 'q') {  
+        if (key == 'q') 
+        {  
             save_statistics();
             keep_last_two_lines();
             exit(0);
         } 
-        if (key == 'e') {  
+        if (key == 'e') 
+        {  
             open_file();
         }
-        if (key == 's') {  
+        if (key == 's') 
+        {  
             s_count++;
             switch (s_count)
             {
@@ -392,7 +438,8 @@ void copy_to_clipboard_interface() {
         else if (key >= '1' && key <= '9') 
         {  
             int index = key - '1';  
-            if (index < clipboard_history.size()) {
+            if (index < clipboard_history.size()) 
+            {
                 copy_to_clipboard(index);
             }
         }
@@ -400,7 +447,8 @@ void copy_to_clipboard_interface() {
 }
 
 
-void prompt(){
+void prompt()
+{
     set_color(RESET);
     cout<<""<<endl<<endl<<endl;
     cout << "press [i]ndex to copy, press e to edit fav"<< endl;
@@ -409,22 +457,25 @@ void prompt(){
 }
 
 
-void get_all_data(){
+void get_all_data()
+{
     system("pbcopy < /dev/null"); 
     vector<string> data = read_file("/Desktop/Data/cs/projects/file-manager/clipboard_history.txt");
     clipboard_history = data;
     read_file("/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt");
+    read_statistics();
 }
 
 
 
-int main(){
+int main()
+{
     thread user_input_thread(copy_to_clipboard_interface);
     animation();
     this_thread::sleep_for(chrono::milliseconds(1500));
     get_all_data();
-    read_statistics();
-    while(true){
+    while(true)
+    {
         save_clipboard_Data();
         check_view();
         check_length();
