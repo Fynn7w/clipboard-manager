@@ -1,2 +1,2 @@
-something_went_wrong
-get_home_dir
+get_clipboard_data
+check_for_double_data

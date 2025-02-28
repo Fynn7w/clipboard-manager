@@ -20,10 +20,18 @@
 
 using namespace std;
 
+
 vector<string> clipboard_history;
 mutex history_mutex; 
 int selected_index = -1;
 int count_pages = 0;
+int count_logs ;
+int count_all;
+bool first_time = false;
+bool stats_view = false;
+auto start_time = std::chrono::steady_clock::now();
+bool date_view = false;
+
 
 
 void set_color(const string& color_code) {
@@ -31,15 +39,19 @@ void set_color(const string& color_code) {
 }
 
 
+
+string print_uptime() {
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start_time);
+    return std::to_string(elapsed.count());
+}
+
+
+
 void erease_clipboard_history(){
     clipboard_history.clear();
 } 
 
-
-std::string get_current_time() {
-    std::time_t now = std::time(nullptr);
-    return std::ctime(&now);
-}
 
 
 void something_went_wrong(string m){
@@ -47,6 +59,7 @@ void something_went_wrong(string m){
         cout<<m<<endl;
         set_color("\033[0m");
 }
+
 
 
 std::string get_home_dir(){
@@ -57,6 +70,23 @@ std::string get_home_dir(){
     }
     return std::string(homeDir);
 }
+
+
+
+void animation(){
+    cout << "" << endl;
+    cout << "" << endl;
+    cout << "       /\\_/\\" << std::endl;
+    cout << "      ( o.o )" << std::endl;
+    cout << "       > ^ <  /" << std::endl;
+    cout << "      /       |" << std::endl;
+    cout << "     (  |  |  )" << std::endl;
+    cout << "    /   |  |   \\" << std::endl;
+    cout << "   (____|_____)";
+    cout <<"";
+    
+}
+
 
 
 char getch() {
@@ -72,16 +102,23 @@ char getch() {
 }
 
 
-void save_to_file(string mode){
-    std::string filePath = get_home_dir() + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
+
+void save_to_file(string mode,string path,string content){
+    std::string filePath = get_home_dir() + path;
     FILE* file = fopen(filePath.c_str(), mode.c_str());
     if(file == nullptr){
         something_went_wrong("something went wrong...");
         return;
     }
     if(file){
+        if(content=="ch"){
         for(int i = 0; i < clipboard_history.size(); i++){
             fwrite(clipboard_history[i].c_str(), sizeof(char), clipboard_history[i].length(), file);
+            fwrite("\n", sizeof(char), 1, file);
+        }
+        }
+        else{
+            fwrite(content.c_str(), sizeof(char), content.length(), file);
             fwrite("\n", sizeof(char), 1, file);
         }
         fclose(file);
@@ -89,24 +126,47 @@ void save_to_file(string mode){
 }
 
 
-void read_file(){
-    std::string filePath = get_home_dir() + "/Desktop/Data/cs/projects/file-manager/clipboard_history.txt";
+
+vector<string> read_file(string path){
+    vector<string> res;
+    std::string filePath = get_home_dir() + path;
     FILE* file = fopen(filePath.c_str(), "r");
     if(file == nullptr)
     {
-        something_went_wrong("something went wrong...");
-        return;
+        count_logs++;
+        first_time = true;
+        return res;
     }
     if(file)
     {
         char buffer[1024];
         while(fgets(buffer, sizeof(buffer), file)){
             std::string line(buffer);
-            clipboard_history.push_back(buffer);
+            res.push_back(buffer);
         }
         fclose(file);
     }
+    return res;
 }
+
+
+
+void read_statistics(){
+    if(first_time){
+        save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_logs));
+        save_to_file("a","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_all));
+    }
+    vector<string> data = read_file("/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt");
+    count_logs = stoi(data[0]);
+    count_all = stoi(data[1]);
+}
+
+
+void save_statistics(){
+    count_logs++;
+    save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_logs));
+    save_to_file("a","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_all));
+    }
 
 
 string get_clipboard_data(){
@@ -147,6 +207,7 @@ void save_clipboard_Data(){
     if (clipboard_history.empty() || clipboard_history.back() != get_clipboard_data() && !check_for_double_data(get_clipboard_data()))
     {
             clipboard_history.push_back(get_clipboard_data());
+            count_all++;
             selected_index = clipboard_history.size()-1;
     }
 }
@@ -155,7 +216,10 @@ void save_clipboard_Data(){
 
 void keep_last_two_lines(){
     clipboard_history.erase(clipboard_history.begin(), clipboard_history.end() - 2);
-    save_to_file("w");
+    for(int i = 0; i < clipboard_history.size(); i++)
+    {
+        save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_history.txt","ch");
+    }
 }
 
 
@@ -179,10 +243,21 @@ bool check_for_empty_data(string s)
 
 
 
-void show_clipboard_data(){
+void show_clipboard_data(string mode){
     system("clear");
-    cout << "[state]          [i]  [content]" << endl;
-    cout << "__________________________________" << endl<< endl;
+    if(mode=="with_stats"){
+        cout << "[state]          [i]  [content]          Total: "<<count_all<<
+        "  logs: "<<count_logs<<endl;
+        cout << "__________________________________________________" << endl<< endl;
+    }
+    if(mode=="without_stats"){
+        cout << "[state]          [i]  [content]     saved in /file-manager/clipboard_history.txt" << endl;
+        cout << "__________________________________________________" << endl<< endl;
+    }
+    if(mode=="date"){
+        cout << "[state]          [i]  [content]"<<"         uptime: "<<print_uptime()<<endl;
+        cout << "__________________________________________________" << endl<< endl;
+    }
     for (int i = 0; i < clipboard_history.size(); i++) 
     {
         string res = clipboard_history[i];
@@ -269,20 +344,53 @@ void open_file() {
 }
 
 
+void check_view(){
+    if(stats_view){
+        show_clipboard_data("with_stats");
+    }
+    else if(date_view){
+        show_clipboard_data("date");
+    }
+    else{
+        show_clipboard_data("without_stats");
+    }
+}
+
 
 void copy_to_clipboard_interface() {
+    int s_count = 0;
     while (true) {
         char key = getch();  
 
         if (key == 'q') {  
-            save_to_file("a");
+            save_statistics();
             keep_last_two_lines();
             exit(0);
         } 
-        if (key == 's') {  
+        if (key == 'e') {  
             open_file();
-        } 
-        else if (key >= '1' && key <= '9') {  
+        }
+        if (key == 's') {  
+            s_count++;
+            switch (s_count)
+            {
+            case 1:
+                stats_view = true;
+                date_view = true;
+                break;
+            case 2:
+                stats_view = false;
+                date_view = true;
+                break;  
+            case 3:
+                stats_view = false;
+                date_view = false;
+                s_count = 0;
+                break;
+            }            
+        }
+        else if (key >= '1' && key <= '9') 
+        {  
             int index = key - '1';  
             if (index < clipboard_history.size()) {
                 copy_to_clipboard(index);
@@ -295,19 +403,30 @@ void copy_to_clipboard_interface() {
 void prompt(){
     set_color(RESET);
     cout<<""<<endl<<endl<<endl;
-    cout << "press [i]ndex to copy, press s to edit fav"<< endl;
+    cout << "press [i]ndex to copy, press e to edit fav"<< endl;
     cout<<"press q save and quit"<<endl;
     cout<<"command :"<<endl;
 }
 
 
-int main(){
+void get_all_data(){
     system("pbcopy < /dev/null"); 
+    vector<string> data = read_file("/Desktop/Data/cs/projects/file-manager/clipboard_history.txt");
+    clipboard_history = data;
+    read_file("/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt");
+}
+
+
+
+int main(){
     thread user_input_thread(copy_to_clipboard_interface);
-    read_file();
+    animation();
+    this_thread::sleep_for(chrono::milliseconds(1500));
+    get_all_data();
+    read_statistics();
     while(true){
         save_clipboard_Data();
-        show_clipboard_data();
+        check_view();
         check_length();
         prompt();
         this_thread::sleep_for(chrono::milliseconds(500));
