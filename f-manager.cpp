@@ -180,12 +180,14 @@ void read_statistics()
 }
 
 
+
 void save_statistics()
 {
     count_logs++;
     save_to_file("w","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_logs));
     save_to_file("a","/Desktop/Data/cs/projects/file-manager/clipboard_stats.txt",to_string(count_all));
     }
+
 
 
 string get_clipboard_data()
@@ -210,6 +212,7 @@ string get_clipboard_data()
 }
 
 
+
 bool check_for_double_data(string s)
 {
     for(int x = 0; x < clipboard_history.size(); x++)
@@ -221,6 +224,7 @@ bool check_for_double_data(string s)
    }
    return false;
 }
+
 
 
 void save_clipboard_Data()
