@@ -263,6 +263,15 @@ bool check_for_empty_data(string s)
     return false;
 }
 
+void prompt()
+{
+    set_color(RESET);
+    cout<<""<<endl<<endl<<endl;
+    cout << "press [i]ndex to copy, press e to edit fav"<< endl;
+    cout<<"press q save and quit"<<endl;
+    cout<<"command :"<<endl;
+}
+
 
 
 void show_clipboard_data(string mode)
@@ -339,6 +348,7 @@ void check_length()
 }
 
 
+
 void copy_to_clipboard(int index)
 {
     lock_guard<mutex> lock(history_mutex);
@@ -356,6 +366,7 @@ void copy_to_clipboard(int index)
 }
 
 
+
 std::string trim_end(std::string s) 
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) 
@@ -364,6 +375,7 @@ std::string trim_end(std::string s)
     }).base(), s.end());
     return s;
 }
+
 
 
 void open_file() 
@@ -381,6 +393,7 @@ void open_file()
 }
 
 
+
 void check_view()
 {
     if(stats_view)
@@ -395,6 +408,7 @@ void check_view()
     {
         show_clipboard_data("without_stats");
     }
+    prompt();
 }
 
 
@@ -447,15 +461,6 @@ void copy_to_clipboard_interface()
 }
 
 
-void prompt()
-{
-    set_color(RESET);
-    cout<<""<<endl<<endl<<endl;
-    cout << "press [i]ndex to copy, press e to edit fav"<< endl;
-    cout<<"press q save and quit"<<endl;
-    cout<<"command :"<<endl;
-}
-
 
 void get_all_data()
 {
@@ -467,21 +472,31 @@ void get_all_data()
 }
 
 
-
-int main()
-{
-    thread user_input_thread(copy_to_clipboard_interface);
+thread start(){
+    thread user_input_thread(copy_to_clipboard_interface); 
     animation();
     this_thread::sleep_for(chrono::milliseconds(1500));
     get_all_data();
+    return user_input_thread;
+}
+
+
+
+void loop(){
+    thread user_input_thread = start();
     while(true)
     {
         save_clipboard_Data();
         check_view();
         check_length();
-        prompt();
         this_thread::sleep_for(chrono::milliseconds(500));
     }
     user_input_thread.join();
+}
+
+
+int main()
+{
+    loop();
     return 0;
 }        
