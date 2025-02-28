@@ -1,2 +1,2 @@
-keep_last_two_lines
-key
+set_color
+namespace

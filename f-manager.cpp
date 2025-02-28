@@ -18,9 +18,8 @@
 #define BLUE    "\033[34m"
 
 
+
 using namespace std;
-
-
 vector<string> clipboard_history;
 mutex history_mutex; 
 int selected_index = -1;
@@ -34,11 +33,13 @@ bool date_view = false;
 string promptmode = "small";
 
 
+
+
+
 void set_color(const string& color_code) 
 {
     cout << color_code;
 }
-
 
 
 string print_uptime() 
@@ -298,7 +299,7 @@ void show_clipboard_data(string mode)
     }
     if(mode=="without_stats")
     {
-        cout << "[state]          [i]  [content]       f:~/clipboard_history.txt" << endl;
+        cout << "[state]          [i]  [content]        use [Q] to save data" << endl;
         cout << "____________________________________________________________________" << endl<< endl;
     }
     if(mode=="date")
